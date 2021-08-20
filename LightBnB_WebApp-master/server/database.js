@@ -18,7 +18,6 @@ const pool = new Pool({
  * @return {Promise<{}>} A promise to the user.
  */
 
-
 const getUserWithEmail = function(email) {
   return pool
     .query(`
@@ -26,7 +25,7 @@ const getUserWithEmail = function(email) {
   `, [email])
     .then((result) => {
       if (result.rows.length !== 0) {
-      return result.rows[0];
+        return result.rows[0];
       } else {
         return null;
       }
@@ -43,6 +42,7 @@ exports.getUserWithEmail = getUserWithEmail;
  * @param {string} id The id of the user.
  * @return {Promise<{}>} A promise to the user.
  */
+
 const getUserWithId = function(id) {
   return pool
     .query(`
@@ -50,7 +50,7 @@ const getUserWithId = function(id) {
   `, [id])
     .then((result) => {
       if (result.rows.length !== 0) {
-      return result.rows[0];
+        return result.rows[0];
       } else {
         return null;
       }
@@ -75,7 +75,7 @@ const addUser = function(user) {
   `, [user.name, user.email, user.password])
     .then((result) => {
       if (result.rows.length !== 0) {
-      return result.rows[0];
+        return result.rows[0];
       } else {
         return null;
       }
@@ -94,7 +94,18 @@ exports.addUser = addUser;
  * @return {Promise<[{}]>} A promise to the reservations.
  */
 const getAllReservations = function(guest_id, limit = 10) {
-  return getAllProperties(null, 2);
+  return pool
+    .query(`
+      SELECT properties.*, reservations.start_date, reservations.end_date 
+      FROM reservations 
+      JOIN properties ON property_id=properties.id 
+      WHERE reservations.guest_id=$1 
+      LIMIT $2;`, [guest_id, limit])
+    .then((result) => {
+      return result.rows
+    }).catch((err) => {
+      console.log(err.message);
+    })
 }
 exports.getAllReservations = getAllReservations;
 
@@ -110,10 +121,10 @@ const getAllProperties = (options, limit = 10) => {
   return pool
     .query(`SELECT * FROM properties LIMIT $1;`, [limit])
     .then((result) => {
-      console.log(result.rows);
+      return result.rows;
     })
     .catch((err) => {
-      console.log(err.message);
+      return err.message;
     });
 };
 exports.getAllProperties = getAllProperties;
